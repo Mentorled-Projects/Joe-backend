@@ -10,19 +10,19 @@ const options = {
             version: "1.0"
         },
         servers: [
-            {
-                url: "http://localhost:3000/",
-                description: 'Production server',
-            },
+            // {
+            //     url: "http://localhost:3000/",
+            //     description: 'Production server',
+            // },
              {
                 url: "http://165.227.45.123:3000", 
                 description: "DigitalOcean live server",
             },
-            {
-               url: "https://peenly.onrender.com/",
-                description: 'Development server',
+            // {
+            //    url: "https://peenly.onrender.com/",
+            //     description: 'Development server',
 
-            },
+            // },
         ],
         components: {
             securitySchemes: {

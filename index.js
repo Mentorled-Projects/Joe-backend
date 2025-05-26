@@ -24,7 +24,9 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 const Port = 3000
 
-app.listen (Port, () => {
+// app.listen (Port, () => {
+    app.listen(Port, '0.0.0.0', () => {
+
     console.log(`Server is up and running on port ${Port}`)
 });
 

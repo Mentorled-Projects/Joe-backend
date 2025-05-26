@@ -18,7 +18,6 @@ const guardianId = req.guardian.id.toString();
     if (!firstName || !lastName) {
       return res.status(400).json({ message: "First name and last name are required." });
     }
-console.log("guardianId:", guardianId);
 
     // Update the user's profile
     const updatedGuardian = await Guardian.findByIdAndUpdate(
@@ -48,5 +47,47 @@ console.log("guardianId:", guardianId);
     console.error("Complete profile error:", err);
     res.status(500).json({ message: "Server error. Please try again." });
   }
+};
+
+exports.getAllGuardians = async (req, res) => {
+    try {
+    // fetch users from database
+    const guardians = await Guardian.find().select('-password'); //Exclude passwprds
+    res.status(200).json(guardians);
+}catch (error) {
+    res.status(500).json({ error: error.message });
+}
+};
+
+// Get a guardian by Id
+  exports.getGuardianById = async (req, res) => {
+    try {
+        const guardian = await Guardian.findById(req.params.id).lean().select('-password');
+       if (!guardian) {
+        return res.status (404).json ({ error: 'User not found'});
+       }
+       res.json(guardian);
+    } catch (error)  {
+      console.error(error)
+        res.status(500).json({ error: error.message });
+    }
+  };
+
+  // Delete a guardian by Id
+  exports.deleteGuardian = async (req, res) => {
+    try {
+        const guardian = await Guardian.findByIdAndDelete(req.params.id);
+
+        if (!guardian) {
+            return res.status (404).json ({ msg: 'User not found'});
+        }
+
+        // await user.remove();
+
+        res.json({ msg: 'User removed successfully' });
+      } catch (err) {
+        console.error(err.message);
+        res.status(400).json({ error: err.message });
+    }
 };
 

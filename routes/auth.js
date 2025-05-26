@@ -1,5 +1,5 @@
 const express = require("express");
-const { registerGuardian, registerTutor, verifyOTP, login } = require("../controllers/authController");
+const { registerGuardian, registerTutor, registerAdmin, verifyOTP, login } = require("../controllers/authController");
 const router = express.Router();
 
 
@@ -174,5 +174,8 @@ router.post("/verify-otp", verifyOTP);
 
 
 router.post("/login", login);
+
+router.post("/register-admin", registerAdmin);
+
 
 module.exports = router;

@@ -1,8 +1,10 @@
 const jwt = require("jsonwebtoken");
 const Guardian = require("../models/Guardian");
 const Tutor = require("../models/Tutor");
+const Admin = require("../models/Admin");
 
-module.exports = async (req, res, next) => {
+
+const authMiddleware = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -27,6 +29,10 @@ module.exports = async (req, res, next) => {
         return res.status(404).json({ message: "Tutor not found" });
       }
       req.tutor = { id: tutor._id };
+    } else if (role === "admin") {
+      const admin = await Admin.findById(id);
+      if (!admin) return res.status(404).json({ message: "Admin not found" });
+      req.admin = { id: admin._id };
     } else {
       return res.status(400).json({ message: "Invalid user role" });
     }
@@ -37,3 +43,10 @@ module.exports = async (req, res, next) => {
     return res.status(401).json({ message: "Invalid token" });
   }
 };
+
+
+
+
+module.exports =authMiddleware
+
+ 

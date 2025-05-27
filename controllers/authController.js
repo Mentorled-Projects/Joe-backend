@@ -4,6 +4,8 @@ const Guardian = require ('../models/Guardian');
 const Tutor = require ('../models/Tutor')
 const Admin = require ('../models/Admin')
 const sendOTP = require ('../src/sendOtp')
+const twilio = require('twilio');
+const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
 //Register guardian with phone number
 
@@ -208,7 +210,7 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign({ id: user._id, role: user.role, phoneNumber: user.phoneNumber }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
     res.json({ message: "Login successful", role, token });
 
@@ -218,27 +220,75 @@ exports.login = async (req, res) => {
   }
 };
 
-// exports.login = async (req, res) => {
-//     const { phoneNumber, password }  = req.body;
+exports.forgotPassword = async (req, res) => {
+  const { phoneNumber } = req.body;
 
-//     try {
+  try {
+    let user = await Guardian.findOne({ phoneNumber });
+    let role = "guardian";
 
-//         const guardian = await Guardian.findOne ({phoneNumber});
-//         if (!guardian) {
-//             return res.status(400).json ({ message: "Invalid credentials" })
-//         }
-       
+    // If not found in Guardian, check Tutor
+    if (!user) {
+      user = await Tutor.findOne({ phoneNumber });
+      role = "tutor";
+    }
+    if (!user) {
+      user = await Admin.findOne({ phoneNumber });
+      role = "admin";
+    }
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
 
-//     const isMatch = await bcrypt.compare(password, guardian.password);
-//       if (!isMatch) {
-//         return res.status(400).json({ message: "Invalid credentials" });
-//       }
-//             console.log("Password match:", isMatch);
-//       const token = jwt.sign({ id: guardian._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
-//       res.json({ message: "Login successful", token });
-//     } catch (error) {
-//                 console.error("Login error:", error);
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-//       res.status(500).json({ message: "Failed to login", error });
-//     }
-//   };
+    user.resetOtp = otp;
+    user.resetOtpExpires = Date.now() + 10 * 60 * 1000; // 10 min
+    await user.save();
+
+    await client.messages.create({
+      body: `Your Peenly password reset OTP is: ${otp}`,
+      from: 'PEENLY',
+      to: phoneNumber,
+    });
+
+    res.json({ message: "OTP sent to phone number" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+exports.resetPassword = async (req, res) => {
+  const { phoneNumber, otp, newPassword } = req.body;
+
+  try {
+    let user = await Guardian.findOne({ phoneNumber });
+    let role = "guardian";
+
+    // If not found in Guardian, check Tutor
+    if (!user) {
+      user = await Tutor.findOne({ phoneNumber });
+      role = "tutor";
+    }
+    if (!user) {
+      user = await Admin.findOne({ phoneNumber });
+      role = "admin";
+    }
+
+    if (!user || user.resetOtp !== otp || user.resetOtpExpires < Date.now()) {
+      return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.resetOtp = undefined;
+    user.resetOtpExpires = undefined;
+    await user.save();
+
+    res.json({ message: "Password reset successful" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};

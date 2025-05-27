@@ -10,6 +10,10 @@ const adminSchema = new mongoose.Schema({
     email: { type: String, unique: true, sparse: true },
     fullName: { type: String},
     role: { type: String, default: 'admin'},
+    resetOtp: String,
+    resetOtpExpires: Date,
+    files: [{ type: mongoose.Schema.Types.ObjectId, ref: 'File' }],
+
     });
     
     

@@ -1,5 +1,5 @@
 const express = require("express");
-const { registerGuardian, registerTutor, registerAdmin, verifyOTP, login } = require("../controllers/authController");
+const { registerGuardian, registerTutor, registerAdmin, verifyOTP, login, forgotPassword, resetPassword } = require("../controllers/authController");
 const router = express.Router();
 
 
@@ -42,7 +42,7 @@ const router = express.Router();
  *                 example: "67123"
  *     responses:
  *       201:
- *         description: User successfully registered
+ *         description: Verification otp sent to your phone number, verify otp to complete your registration
  *         content:
  *           application/json:
  *             schema:
@@ -83,7 +83,7 @@ router.post("/register-guardian", registerGuardian);
  *                 example: "67123"
  *     responses:
  *       201:
- *         description: User successfully registered
+ *         description: Verification otp sent to your phone number, verify otp to complete your registration
  *         content:
  *           application/json:
  *             schema:
@@ -175,7 +175,117 @@ router.post("/verify-otp", verifyOTP);
 
 router.post("/login", login);
 
+/**
+ * @swagger
+ * /api/v1/auth/register-admin:
+ *   post:
+ *     summary: Register a new admin
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - fullName
+ *               - email
+ *               - phoneNumber
+ *               - password
+ *             properties:
+ *               fullName:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               phoneNumber:
+ *                 type: string
+ *                 description: Phone number with country code (e.g., +234XXXXXXXXXX). Country code is compulsory.
+ *                 example: "+2348123456789"
+ *               password:
+ *                 type: string
+ *                 description: User's password
+ *                 example: "67123"
+ *     responses:
+ *       201:
+ *         description: Verification otp sent to your phone number, verify otp to complete your registration
+ *       400:
+ *         description: Bad request - Missing or invalid fields
+ *       409:
+ *         description: Conflict - Admin already exists
+ *       500:
+ *         description: Internal server error
+ */
+
 router.post("/register-admin", registerAdmin);
+
+/**
+ * @swagger
+ * /api/v1/auth/forgot-password:
+ *   post:
+ *     summary: Request password reset
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - phoneNumber
+ *             properties:
+ *               phoneNumber:
+ *                 type: string
+ *                 description: Phone number with country code (e.g., +234XXXXXXXXXX). Country code is compulsory.
+ *                 example: "+2348123456789"
+ *     responses:
+ *       200:
+ *         description: Password reset otp sent
+ *       400:
+ *         description: Invalid request or phone number not found
+ *       500:
+ *         description: Internal server error
+ */
+
+router.post("/forgot-password", forgotPassword);
+
+/**
+ * @swagger
+ * /api/v1/auth/reset-password:
+ *   post:
+ *     summary: Reset password
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - otp
+ *               - newPassword
+ *               - phoneNumber
+ *             properties:
+ *               otp:
+ *                 type: string
+ *                 description: The reset otp sent to phone number
+ *               newPassword:
+ *                 type: string
+ *                 format: password
+ *               phoneNumber:
+ *                 type: string
+ *                 description: Phone number with country code (e.g., +234XXXXXXXXXX). Country code is compulsory.
+ *                 example: "+2348123456789"
+ *     responses:
+ *       200:
+ *         description: Password reset successful
+ *       400:
+ *         description: Invalid or expired token
+ *       500:
+ *         description: Internal server error
+ */
+
+router.post("/reset-password", resetPassword);
 
 
 module.exports = router;

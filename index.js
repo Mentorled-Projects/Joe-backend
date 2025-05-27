@@ -18,6 +18,8 @@ app.use ('/api/v1/auth', require ('./routes/auth'));
 app.use ('/api/v1/guardian', require ('./routes/guardian'))
 app.use ('/api/v1/tutor', require ('./routes/tutor'))
 app.use ('/api/v1/child', require ('./routes/child'))
+app.use ('/api/v1/upload', require ('./routes/upload'))
+
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
@@ -32,21 +34,3 @@ const Port = 3000
 
 connectToDatabase()
 
-// { 
-//   "firstName": "Dayo",
-//   "lastName": "Samuel",
-//   "dateOfBirth": "02/01/2005",
-//   "gender": "Female",
-//   "middleName": "Esther",
-//   "schoolName": "Rosebud",
-//   "sports": [ "Chess",
-//   "Football"
-//   ],
-//   "Class": "Grade2",
-//   "educationalLevel": "Preschool",
-//   "interests": [
-//     "Reading",
-//     "Cooking"
-//   ]
-
-// }

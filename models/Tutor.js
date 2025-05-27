@@ -16,6 +16,10 @@ const tutorSchema = new mongoose.Schema({
     language: { type: String},
     religion: { type: String},
     role: { type: String, default: 'tutor'},
+    resetOtp: String,
+    resetOtpExpires: Date,
+    files: [{ type: mongoose.Schema.Types.ObjectId, ref: 'File' }],
+
 
 });
 

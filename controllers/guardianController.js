@@ -52,8 +52,17 @@ const guardianId = req.guardian.id.toString();
 exports.getAllGuardians = async (req, res) => {
     try {
     // fetch users from database
-    const guardians = await Guardian.find().select('-password'); //Exclude passwprds
-    res.status(200).json(guardians);
+    // const guardians = await Guardian.find().select('-password'); //Exclude passwprds
+    const guardians = await Guardian.find()
+  .populate({
+    path: 'child',
+    select: 'firstName lastName middleName  age gender dateOfBirth Class schoolName sports educationalLevel interests'  // select only the fields you want
+  })
+  .populate({
+    path: 'files',
+    select: 'url filename'  // guardian files if you want those too
+  });
+    res.status(200).json({ data: guardians });
 }catch (error) {
     res.status(500).json({ error: error.message });
 }
@@ -62,11 +71,19 @@ exports.getAllGuardians = async (req, res) => {
 // Get a guardian by Id
   exports.getGuardianById = async (req, res) => {
     try {
-        const guardian = await Guardian.findById(req.params.id).lean().select('-password');
+        const guardian = await Guardian.findById(req.params.id)
+        .populate({
+    path: 'child',
+    select: 'firstName lastName middleName  age gender dateOfBirth Class schoolName sports educationalLevel interests'  // select only the fields you want
+  })
+  .populate({
+    path: 'files',
+    select: 'url filename'  // guardian files if you want those too
+  }).lean().select('-password');
        if (!guardian) {
         return res.status (404).json ({ error: 'User not found'});
        }
-       res.json(guardian);
+       res.json ({ data: guardian});
     } catch (error)  {
       console.error(error)
         res.status(500).json({ error: error.message });

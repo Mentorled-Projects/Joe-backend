@@ -77,6 +77,46 @@ router.put("/complete-profile", authMiddleware, completeProfile);
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     File:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         url:
+ *           type: string
+ *         filename:
+ *           type: string
+ *     Child:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         firstName:
+ *           type: string
+ *         age:
+ *           type: number
+ *         gender:
+ *           type: string
+ *     Guardian:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         fullName:
+ *           type: string
+ *         email:
+ *           type: string
+ *         phoneNumber:
+ *           type: string
+ *         files:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/File'
+ *         child:
+ *           $ref: '#/components/schemas/Child'
+ *
  * /api/v1/guardian/get-all-guardians:
  *   get:
  *     summary: Get all guardians

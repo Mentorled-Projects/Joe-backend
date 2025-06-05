@@ -62,6 +62,14 @@ const onlyAdmin = require ('../middleware/adminMiddleware')
  *               religion:
  *                 type: string
  *                 example: Christianity
+ *               availabity:
+ *                 type: string
+ *               teachingCategory:
+ *                 type: string
+ *               subject:
+ *                 type: string
+ *               experience:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Profile completed successfully

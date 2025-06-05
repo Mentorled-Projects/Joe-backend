@@ -52,7 +52,7 @@ exports.registerGuardian = async (req,res) => {
 
     } catch (err) {
     console.error("Regsitration error:", err)
-    res.status(500).json ({ message: 'Server error'});
+    res.status(500).json ({ message: 'Server error:', err});
     }
 };
 
@@ -255,7 +255,7 @@ exports.forgotPassword = async (req, res) => {
     res.json({ message: "OTP sent to phone number" });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error:", err});
   }
 };
 
@@ -289,6 +289,6 @@ exports.resetPassword = async (req, res) => {
     res.json({ message: "Password reset successful" });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error:", err});
   }
 };

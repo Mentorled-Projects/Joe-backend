@@ -29,7 +29,12 @@ const tutorId = req.tutor.id.toString();
         gender,
         city,
         language,
-        religion      },
+        religion,
+        availablity,
+        teachingCategory,
+        subject,
+        experience
+      },
       { new: true, runValidators: true }
     );
 

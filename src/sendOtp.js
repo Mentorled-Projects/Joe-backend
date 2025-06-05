@@ -8,8 +8,6 @@ const sendOTP = async (phoneNumber, otp) => {
       to: phoneNumber,
       from: 'PEENLY'
     });
-    // console.log('Message SID:', message.sid);
-    // console.log('Message status:', message.status);
     return message;
   } catch (error) {
     console.error('Twilio error:', error);

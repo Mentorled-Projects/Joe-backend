@@ -18,6 +18,10 @@ const tutorSchema = new mongoose.Schema({
     role: { type: String, default: 'tutor'},
     resetOtp: String,
     resetOtpExpires: Date,
+    teachingCategory: String,
+    experience: String,
+    subject: String,
+    availablity: String,
     files: [{ type: mongoose.Schema.Types.ObjectId, ref: 'File' }],
 
 

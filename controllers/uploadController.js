@@ -43,13 +43,6 @@ exports.uploadFile = async (req, res) => {
 
     fs.unlinkSync(filePath); // delete temp file
 
-    // const fileDoc = await File.create({
-    //   filename: req.file.originalname,
-    //   url: result.secure_url,
-    //   resource_type: result.resource_type,
-    //   phoneNumber,
-    // });
-
     const filePayload = {
   filename: req.file.originalname,
   url: result.secure_url,

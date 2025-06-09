@@ -12,6 +12,21 @@ const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TO
 exports.registerGuardian = async (req,res) => {
     const { phoneNumber, password } = req.body;
 
+    // Validate phone number (must be 12 or 13 digits)
+  const isValidPhone = /^\+?\d{12,13}$/.test(phoneNumber);
+  if (!isValidPhone) {
+    return res.status(400).json({ message: 'Phone number must be 12 or 13 digits' });
+  }
+
+  //Validate password: min 8 characters, at least 1 letter, 1 number, and 1 special character
+  const isValidPassword = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/.test(password);
+  if (!isValidPassword) {
+    return res.status(400).json({
+      message:
+        'Password must be at least 8 characters long and include a letter, number, and special character',
+    });
+  }
+
     try {
         //check if phone number already exists
         const existingGuardian = await Guardian.findOne ({ phoneNumber });
@@ -28,7 +43,7 @@ exports.registerGuardian = async (req,res) => {
 
         //Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
-    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // expires in 10 mins
+    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); 
         //Create new user
         const newGuardian = new Guardian({
             phoneNumber,
@@ -59,6 +74,20 @@ exports.registerGuardian = async (req,res) => {
 //Register Tutor
 exports.registerTutor = async (req,res) => {
     const { phoneNumber, password } = req.body;
+     // Validate phone number (must be 12 or 13 digits)
+  const isValidPhone = /^\+?\d{12,13}$/.test(phoneNumber);
+  if (!isValidPhone) {
+    return res.status(400).json({ message: 'Phone number must be 12 or 13 digits' });
+  }
+
+  //Validate password: min 8 characters, at least 1 letter, 1 number, and 1 special character
+  const isValidPassword = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/.test(password);
+  if (!isValidPassword) {
+    return res.status(400).json({
+      message:
+        'Password must be at least 8 characters long and include a letter, number, and special character',
+    });
+  }
 
     try {
         //check if phone number already exists
@@ -107,6 +136,21 @@ exports.registerTutor = async (req,res) => {
 exports.registerAdmin = async (req, res) => {
   const { fullName, phoneNumber, password, email } = req.body;
 
+   // Validate phone number (must be 12 or 13 digits)
+  const isValidPhone = /^\+?\d{12,13}$/.test(phoneNumber);
+  if (!isValidPhone) {
+    return res.status(400).json({ message: 'Phone number must be 12 or 13 digits' });
+  }
+
+  //Validate password: min 8 characters, at least 1 letter, 1 number, and 1 special character
+  const isValidPassword = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/.test(password);
+  if (!isValidPassword) {
+    return res.status(400).json({
+      message:
+        'Password must be at least 8 characters long and include a letter, number, and special character',
+    });
+  }
+
   try {
     const existing = await Admin.findOne({ phoneNumber });
     if (existing) {
@@ -131,9 +175,6 @@ exports.registerAdmin = async (req, res) => {
     await newAdmin.save();
     await sendOTP(phoneNumber, otp);
 
-
-    // const token = jwt.sign({ id: newAdmin._id, role: "admin" }, process.env.JWT_SECRET, { expiresIn: "1h" });
-
     res.status(201).json({ message: "OTP sent to phone. Please verify to complete registration.",
       admin: {
         id: newAdmin._id,
@@ -143,6 +184,59 @@ exports.registerAdmin = async (req, res) => {
   } catch (error) {
     console.error("Admin registration error:", error);
     res.status(500).json({ message: "Failed to register admin", error });
+  }
+};
+
+exports.resendOTP = async (req, res) => {
+  const { phoneNumber } = req.body;
+
+  try {
+    let user = await Guardian.findOne({ phoneNumber });
+    let role = "guardian";
+
+    // If not found in Guardian, check Tutor
+    if (!user) {
+      user = await Tutor.findOne({ phoneNumber });
+      role = "tutor";
+    }
+
+    // If not Tutor, check Admin
+    if (!user) {
+      user = await Admin.findOne({ phoneNumber });
+      role = "admin";
+    }
+
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({ message: 'Phone number already verified' });
+    }
+
+   const now = new Date();
+const lastSent = new Date(user.lastVerificationOtpSentAt);
+
+if (user.lastVerificationOtpSentAt && now.getTime() - lastSent.getTime() < 60 * 1000) {
+  return res.status(429).json({ message: 'Please wait before requesting another OTP' });
+}
+
+    // Generate new OTP and expiration
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    user.otp = otp;
+    user.otpExpiresAt = otpExpiresAt;
+    user.lastVerificationOtpSentAt = now; 
+    await user.save();
+
+    await sendOTP(phoneNumber, otp);
+
+    return res.status(200).json({ message: 'OTP resent successfully' });
+  } catch (err) {
+    console.error('Resend OTP error:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
 
@@ -258,6 +352,61 @@ exports.forgotPassword = async (req, res) => {
     res.status(500).json({ message: "Server error:", err});
   }
 };
+
+exports.resendForgotPasswordOTP = async (req, res) => {
+  const { phoneNumber } = req.body;
+
+  try {
+    let user = await Guardian.findOne({ phoneNumber });
+    let role = "guardian";
+
+    // If not found in Guardian, check Tutor
+    if (!user) {
+      user = await Tutor.findOne({ phoneNumber });
+      role = "tutor";
+    }
+
+    // If not Tutor, check Admin
+    if (!user) {
+      user = await Admin.findOne({ phoneNumber });
+      role = "admin";
+    }
+
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const now = new Date();
+const lastSent = new Date(user.lastResetOtpSentAt);
+
+if (user.lastResetOtpSentAt && now.getTime() - lastSent.getTime() < 60 * 1000) {
+  return res.status(429).json({ message: 'Please wait before requesting another OTP' });
+}
+    
+    // Generate new OTP and expiration
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    user.resetOtp = otp;
+    user.resetOtpExpires = otpExpiresAt;
+    user.lastResetOtpSentAt = now; 
+    await user.save();
+
+    await client.messages.create({
+      body: `Your Peenly password reset OTP is: ${otp}`,
+      from: 'PEENLY',
+      to: phoneNumber,
+    });
+
+
+    return res.status(200).json({ message: 'OTP resent successfully' });
+  } catch (err) {
+    console.error('Resend OTP error:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
 
 
 exports.resetPassword = async (req, res) => {

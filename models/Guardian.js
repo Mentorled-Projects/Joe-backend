@@ -5,7 +5,14 @@ const guardianSchema = new mongoose.Schema({
     phoneNumber: { type: String, required: true, unique: true},
     otp: String,
     otpExpiresAt: Date,
-    isVerified: { type: Boolean, default: false },
+   lastVerificationOtpSentAt: {
+  type: Date,
+  default: null,
+},
+   lastResetOtpSentAt: {
+  type: Date,
+  default: null,
+},    isVerified: { type: Boolean, default: false },
     password: { type: String, required: false},
     createdAt: { type: Date, default: Date.now},
     email: { type: String, unique: true, sparse: true },

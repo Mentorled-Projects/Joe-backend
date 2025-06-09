@@ -1,5 +1,5 @@
 const express = require("express");
-const { registerGuardian, registerTutor, registerAdmin, verifyOTP, login, forgotPassword, resetPassword } = require("../controllers/authController");
+const { registerGuardian, registerTutor, registerAdmin, resendOTP, verifyOTP, login, forgotPassword, resendForgotPasswordOTP, resetPassword } = require("../controllers/authController");
 const router = express.Router();
 
 
@@ -221,6 +221,44 @@ router.post("/register-admin", registerAdmin);
 
 /**
  * @swagger
+ * /api/v1/auth/resend-otp:
+ *   post:
+ *     summary: Resend verification OTP
+ *     tags: [Auth]
+ *     requestBody:
+ *       description: Resend verification OTP
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               phoneNumber:
+ *                 type: string
+ *                 description: Phone number with country code (e.g., +234XXXXXXXXXX). Country code is compulsory.
+ *                 example: "+2348012345678"
+ *     responses:
+ *       201:
+ *         description: Verification otp has been reset to your phone number, verify otp to complete your registration
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Server error
+ */
+
+router.post("/resend-otp", resendOTP);
+
+
+/**
+ * @swagger
  * /api/v1/auth/forgot-password:
  *   post:
  *     summary: Request password reset
@@ -248,6 +286,36 @@ router.post("/register-admin", registerAdmin);
  */
 
 router.post("/forgot-password", forgotPassword);
+
+/**
+ * @swagger
+ * /api/v1/auth/resend-forgot-password-otp:
+ *   post:
+ *     summary: Request password reset
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - phoneNumber
+ *             properties:
+ *               phoneNumber:
+ *                 type: string
+ *                 description: Phone number with country code (e.g., +234XXXXXXXXXX). Country code is compulsory.
+ *                 example: "+2348123456789"
+ *     responses:
+ *       200:
+ *         description: Password reset otp resent
+ *       400:
+ *         description: Invalid request or phone number not found
+ *       500:
+ *         description: Internal server error
+ */
+
+router.post("/resend-forgot-password-otp", resendForgotPasswordOTP);
 
 /**
  * @swagger

@@ -51,8 +51,6 @@ const guardianId = req.guardian.id.toString();
 
 exports.getAllGuardians = async (req, res) => {
     try {
-    // fetch users from database
-    // const guardians = await Guardian.find().select('-password'); //Exclude passwprds
     const guardians = await Guardian.find()
   .populate({
     path: 'child',
@@ -66,6 +64,54 @@ exports.getAllGuardians = async (req, res) => {
 }catch (error) {
     res.status(500).json({ error: error.message });
 }
+};
+
+exports.getPaginatedGuardians = async (req, res) => {
+  try {
+    let { page = 1, limit = 10, search = '' } = req.query;
+
+    page = parseInt(page);
+    limit = parseInt(limit);
+
+    if (page < 1 || limit < 1) {
+      return res.status(400).json({ error: "Page and limit must be positive numbers" });
+    }
+
+    const query = {};
+
+    // Optional search filtering by name or email (example)
+    if (search) {
+      query.$or = [
+        { firstName: { $regex: search, $options: 'i' } },
+        { lastName: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const totalGuardians = await Guardian.countDocuments(query);
+
+    const guardians = await Guardian.find(query)
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .populate({
+        path: 'child',
+        select: 'firstName lastName middleName age gender dateOfBirth Class schoolName sports educationalLevel interests'
+      })
+      .populate({
+        path: 'files',
+        select: 'url filename'
+      });
+
+    res.json({
+      totalGuardians,
+      currentPage: page,
+      totalPages: Math.ceil(totalGuardians / limit),
+      guardians
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
 // Get a guardian by Id
@@ -90,10 +136,38 @@ exports.getAllGuardians = async (req, res) => {
     }
   };
 
+  exports.getGuardianByPhoneNumber = async (req, res) => {
+     try {
+    const { phoneNumber } = req.body;
+
+    if (!phoneNumber) {
+      return res.status(400).json({ msg: 'Phone number is required' });
+    }
+
+    const guardian = await Guardian.findOne({ phoneNumber })
+        .populate({
+    path: 'child',
+    select: 'firstName lastName middleName  age gender dateOfBirth Class schoolName sports educationalLevel interests'  // select only the fields you want
+  })
+  .populate({
+    path: 'files',
+    select: 'url filename'  // guardian files if you want those too
+  }).lean().select('-password');
+       if (!guardian) {
+        return res.status (404).json ({ error: 'Use not found'});
+       }
+       res.json ({ data: guardian});
+    } catch (error)  {
+      console.error(error)
+        res.status(500).json({ error: error.message });
+    }
+  };
+
   // Delete a guardian by Id
   exports.deleteGuardian = async (req, res) => {
     try {
         const guardian = await Guardian.findByIdAndDelete(req.params.id);
+
 
         if (!guardian) {
             return res.status (404).json ({ msg: 'User not found'});

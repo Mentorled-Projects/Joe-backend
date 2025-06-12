@@ -55,8 +55,12 @@ const tutorId = req.tutor.id.toString();
 exports.getAllTutors = async (req, res) => {
     try {
     // fetch tutors from database
-    const tutors = await Tutor.find().select('-password'); //Exclude passwprds
-    res.status(200).json(tutors);
+    const tutors = await Tutor.find()
+    .populate({
+    path: 'files',
+    select: 'url filename'  
+  });
+    res.status(200).json({ data: tutors});
 }catch (error) {
     res.status(500).json({ error: error.message });
 }
@@ -65,11 +69,15 @@ exports.getAllTutors = async (req, res) => {
 // Get a tutor by Id
   exports.getTutorById = async (req, res) => {
     try {
-        const tutor = await Tutor.findById(req.params.id).lean().select('-password');
+        const tutor = await Tutor.findById(req.params.id).lean()
+        .populate({
+         path: 'files',
+         select: 'url filename'  
+  });
        if (!tutor) {
         return res.status (404).json ({ error: 'User not found'});
        }
-       res.json(tutor);
+    res.json({ data: tutor});
     } catch (error)  {
       console.error(error)
         res.status(500).json({ error: error.message });

@@ -15,6 +15,7 @@ app.use (express.json());
 app.use(cors());
 
 app.use ('/api/v1/auth', require ('./routes/auth'));
+app.use ('/api/v1/users', require ('./routes/users'));
 app.use ('/api/v1/guardian', require ('./routes/guardian'))
 app.use ('/api/v1/tutor', require ('./routes/tutor'))
 app.use ('/api/v1/child', require ('./routes/child'))

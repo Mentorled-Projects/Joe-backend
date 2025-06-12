@@ -2,17 +2,22 @@ const mongoose = require ('mongoose');
 
 const tutorSchema = new mongoose.Schema({
     phoneNumber: { type: String, required: true, unique: true},
-    otp: String,
-    otpExpiresAt: Date,
-lastVerificationOtpSentAt: {
+    otp: {type: String, select: false},
+    otpExpiresAt: {
   type: Date,
-  default: null,
+  select: false
 },
-lastResetOtpSentAt: {
+   lastVerificationOtpSentAt: {
   type: Date,
   default: null,
+  select: false
+},
+   lastResetOtpSentAt: {
+  type: Date,
+  default: null,
+  select: false
 },    isVerified: { type: Boolean, default: false },
-    password: { type: String, required: false},
+    password: { type: String, required: false, select: false},
     createdAt: { type: Date, default: Date.now},
     email: { type: String, unique: true, sparse: true },
     firstName: { type: String},
@@ -23,8 +28,8 @@ lastResetOtpSentAt: {
     language: { type: String},
     religion: { type: String},
     role: { type: String, default: 'tutor'},
-    resetOtp: String,
-    resetOtpExpires: Date,
+    resetOtp: {type: String, select: false},
+    resetOtpExpires: {type: Date, select: false},
     teachingCategory: String,
     experience: String,
     subject: String,

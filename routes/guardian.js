@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { completeProfile, getAllGuardians, getGuardianById } = require('../controllers/guardianController')
+const { completeProfile, getAllGuardians, getGuardianById, getPaginatedGuardians, getGuardianByPhoneNumber } = require('../controllers/guardianController')
 const  authMiddleware  = require('../middleware/authMiddleware');
 const onlyAdmin = require ('../middleware/adminMiddleware')
 
@@ -181,6 +181,121 @@ router.get("/get-all-guardians", authMiddleware, onlyAdmin, getAllGuardians)
  */
 
 router.get ("/get-by-id/:id", authMiddleware, onlyAdmin, getGuardianById)
+
+/**
+ * @swagger
+ * /api/v1/guardian/by-phone:
+ *   get:
+ *     summary: Get a guardian by phone number
+ *     tags: [Guardian Management]
+ *     description: Retrieve a guardian using their phone number
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - phoneNumber
+ *             properties:
+ *               phoneNumber:
+ *                 type: string
+ *                 example: "08012345678"
+ *                 description: The phone number of the guardian
+ *     responses:
+ *       200:
+ *         description: Guardian retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 _id:
+ *                   type: string
+ *                 firstName:
+ *                   type: string
+ *                 lastName:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 phoneNumber:
+ *                   type: string
+ *                 child:
+ *                   type: object
+ *                   description: Linked child information
+ *       404:
+ *         description: Guardian not found
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
+
+router.get ("/by-phone", getGuardianByPhoneNumber)
+
+/**
+ * @swagger
+ * /api/v1/guardian/get-paginated:
+ *   get:
+ *     summary: Get paginated list of guardians
+ *     tags: [Guardian Management]
+ *     description: Fetch a paginated list of guardians with optional search filter.
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of guardians per page
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Optional search by name or email
+ *     responses:
+ *       200:
+ *         description: Paginated guardians fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalGuardians:
+ *                   type: integer
+ *                 currentPage:
+ *                   type: integer
+ *                 totalPages:
+ *                   type: integer
+ *                 guardians:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       firstName:
+ *                         type: string
+ *                       lastName:
+ *                         type: string
+ *                       phoneNumber:
+ *                         type: string
+ *                       email:
+ *                         type: string
+ *                       child:
+ *                         type: object
+ *                         description: Linked child data
+ *       500:
+ *         description: Internal server error
+ */
+
+router.get("/get-paginated", authMiddleware, onlyAdmin, getPaginatedGuardians)
+
 
 
 

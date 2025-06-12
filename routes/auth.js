@@ -1,6 +1,9 @@
 const express = require("express");
 const { registerGuardian, registerTutor, registerAdmin, resendOTP, verifyOTP, login, forgotPassword, resendForgotPasswordOTP, resetPassword } = require("../controllers/authController");
 const router = express.Router();
+const  authMiddleware  = require('../middleware/authMiddleware');
+const onlyAdmin = require ('../middleware/adminMiddleware')
+
 
 
 
@@ -354,6 +357,5 @@ router.post("/resend-forgot-password-otp", resendForgotPasswordOTP);
  */
 
 router.post("/reset-password", resetPassword);
-
 
 module.exports = router;

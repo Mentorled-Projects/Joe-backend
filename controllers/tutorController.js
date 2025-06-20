@@ -56,6 +56,8 @@ exports.getAllTutors = async (req, res) => {
     try {
     // fetch tutors from database
     const tutors = await Tutor.find()
+     .select('-password -lastVerificationOtpSentAt -otp -lastOtpSentAt -otpExpiresAt -lastResetOtpSentAt') 
+
     .populate({
     path: 'files',
     select: 'url filename'  
@@ -70,6 +72,8 @@ exports.getAllTutors = async (req, res) => {
   exports.getTutorById = async (req, res) => {
     try {
         const tutor = await Tutor.findById(req.params.id).lean()
+         .select('-password -lastVerificationOtpSentAt -otp -lastOtpSentAt -otpExpiresAt -lastResetOtpSentAt') 
+
         .populate({
          path: 'files',
          select: 'url filename'  

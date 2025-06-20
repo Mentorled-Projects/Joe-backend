@@ -189,19 +189,14 @@ router.get ("/get-by-id/:id", authMiddleware, onlyAdmin, getGuardianById)
  *     summary: Get a guardian by phone number
  *     tags: [Guardian Management]
  *     description: Retrieve a guardian using their phone number
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - phoneNumber
- *             properties:
- *               phoneNumber:
- *                 type: string
- *                 example: "08012345678"
- *                 description: The phone number of the guardian
+  *     parameters:
+ *       - in: query
+ *         name: phoneNumber
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Phone number of the guardian
+ *         example: "+1234567890"
  *     responses:
  *       200:
  *         description: Guardian retrieved successfully

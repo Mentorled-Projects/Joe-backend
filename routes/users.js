@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { getAllUsers, deleteUser, getPaginatedUsers } = require('../controllers/usersController')
+const { getAllUsers, deleteUser, getPaginatedUsers, getByPhoneNumber } = require('../controllers/usersController')
 const  authMiddleware  = require('../middleware/authMiddleware');
 const onlyAdmin = require ('../middleware/adminMiddleware')
 
@@ -115,6 +115,66 @@ router.get('/get-all-users', authMiddleware, onlyAdmin, getAllUsers);
  */
 
 router.get('/get-paginated-users', getPaginatedUsers);
+
+/**
+ * @swagger
+ * /api/v1/users/get-by-phone:
+ *   get:
+ *     summary: Get user by phone number
+ *     tags: [User Management]
+ *     description: Searches Guardian, Tutor, and Admin collections for a user with the provided phone number.
+ *     parameters:
+ *       - in: query
+ *         name: phoneNumber
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Phone number of the user to look up
+ *         example: "+1234567890"
+ *     responses:
+ *       200:
+ *         description: User found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: object
+ *                   description: The found user (guardian, tutor, or admin)
+ *       400:
+ *         description: Phone number not provided
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Phone number not provided.
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: User not found
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Something went wrong
+ */
+
+router.get ('/get-by-phone', getByPhoneNumber);
 /**
  * @swagger
  * /api/v1/users/delete:

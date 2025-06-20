@@ -3,22 +3,20 @@ const bcrypt = require ('bcryptjs');
 
 const guardianSchema = new mongoose.Schema({
     phoneNumber: { type: String, required: true, unique: true},
-    otp: {type: String, select: false},
+    otp: {type: String},
     otpExpiresAt: {
   type: Date,
-  select: false
 },
    lastVerificationOtpSentAt: {
   type: Date,
   default: null,
-  select: false
 },
    lastResetOtpSentAt: {
   type: Date,
   default: null,
-  select: false
-},    isVerified: { type: Boolean, default: false },
-    password: { type: String, required: false, select: false},
+},   
+ isVerified: { type: Boolean, default: false },
+    password: { type: String, required: false},
     createdAt: { type: Date, default: Date.now},
     email: { type: String, unique: true, sparse: true },
     firstName: { type: String},
@@ -33,11 +31,9 @@ const guardianSchema = new mongoose.Schema({
     child: [{ type: mongoose.Schema.Types.ObjectId, ref: "Child" }],
     resetOtp:  {
   type: String,
-  select: false
 },
     resetOtpExpires:  {
   type: Date,
-  select: false
 }, 
     files: [{ type: mongoose.Schema.Types.ObjectId, ref: 'File' }],
 

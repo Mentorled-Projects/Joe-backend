@@ -10,7 +10,7 @@ const DeletionLog = require ('../models/deletionLog')
 exports.getAllUsers = async (req, res) => {
     try {
         const guardians = await Guardian.find()
-          .select('-password -lastVerificationOtpSentAt-otp -lastOtpSentAt -otpExpiresAt -lastResetOtpSentAt') 
+          .select('-password -lastVerificationOtpSentAt -otp -lastOtpSentAt -otpExpiresAt -lastResetOtpSentAt') 
 
             .populate({
                 path: 'child',
@@ -22,7 +22,7 @@ exports.getAllUsers = async (req, res) => {
             });
 
         const tutors = await Tutor.find()
-          .select('-password -lastVerificationOtpSentAt-otp -lastOtpSentAt -otpExpiresAt -lastResetOtpSentAt') 
+          .select('-password -lastVerificationOtpSentAt -otp -lastOtpSentAt -otpExpiresAt -lastResetOtpSentAt') 
 
         .populate({
                 path: 'files',
@@ -30,7 +30,7 @@ exports.getAllUsers = async (req, res) => {
             });
 
         const admins = await Admin.find()
-          .select('-password -lastVerificationOtpSentAt-otp -lastOtpSentAt -otpExpiresAt -lastResetOtpSentAt') 
+          .select('-password -lastVerificationOtpSentAt -otp -lastOtpSentAt -otpExpiresAt -lastResetOtpSentAt') 
           
 
 res.status(200).json({
@@ -63,6 +63,41 @@ exports.deleteUser = async (req, res) => {
         console.error(err.message);
         res.status(400).json({ error: err.message });
     }
+};
+
+exports.getByPhoneNumber = async (req, res) => {
+
+  try {
+     const { phoneNumber } = req.query;
+
+     if (!phoneNumber) {
+      return res.status(400).json ({ message: "Phone number not found." })
+     }
+         const findUser = async (Model, phoneNumber) => {
+  return await Model.findOne({ phoneNumber })
+    .select('-password -lastVerificationOtpSentAt -otp -lastOtpSentAt -otpExpiresAt -lastResetOtpSentAt')
+    .populate({
+      path: 'files',
+      select: 'url filename'
+    });
+};
+
+const guardian = await findUser(Guardian, phoneNumber);
+const tutor = await findUser(Tutor, phoneNumber);
+const admin = await findUser(Admin, phoneNumber);
+
+   const user = guardian || tutor || admin; 
+
+         if (!user) {
+        return res.status (404).json ({ error: 'User not found'});
+       }
+       res.json ({ data: user});
+
+  } catch (error) {
+    console.error (error)
+    res.status(500).json ({ error: error.message});
+    
+  }
 };
 
 

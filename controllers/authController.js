@@ -263,6 +263,9 @@ exports.verifyOTP = async (req, res) => {
     if (!user) return res.status(400).json({ message: 'User not found' });
     if (user.isVerified) return res.status(400).json({ message: 'User already verified' });
     if (user.otp !== otp) return res.status(400).json({ message: 'Invalid OTP' });
+//     if (String(user.otp) !== String(otp)) {
+//   return res.status(400).json({ message: 'Invalid OTP' });
+// }
     if (user.otpExpiresAt < new Date()) return res.status(400).json({ message: 'OTP expired' });
 
     user.isVerified = true;
@@ -274,6 +277,8 @@ exports.verifyOTP = async (req, res) => {
 
   } catch (err) {
     console.error('OTP verify error:', err);
+        console.log('OTP verify error:', err);
+
     res.status(500).json({ message: 'Server error' });
   }
 };

@@ -52,6 +52,8 @@ const guardianId = req.guardian.id.toString();
 exports.getAllGuardians = async (req, res) => {
     try {
     const guardians = await Guardian.find()
+    .select('-password -lastVerificationOtpSentAt -otp -lastOtpSentAt -otpExpiresAt -lastResetOtpSentAt') 
+
   .populate({
     path: 'child',
     select: 'firstName lastName middleName  age gender dateOfBirth Class schoolName sports educationalLevel interests'  // select only the fields you want
@@ -93,6 +95,8 @@ exports.getPaginatedGuardians = async (req, res) => {
     const guardians = await Guardian.find(query)
       .skip((page - 1) * limit)
       .limit(limit)
+      .select('-password -lastVerificationOtpSentAt -otp -lastOtpSentAt -otpExpiresAt -lastResetOtpSentAt') 
+
       .populate({
         path: 'child',
         select: 'firstName lastName middleName age gender dateOfBirth Class schoolName sports educationalLevel interests'
@@ -118,6 +122,7 @@ exports.getPaginatedGuardians = async (req, res) => {
   exports.getGuardianById = async (req, res) => {
     try {
         const guardian = await Guardian.findById(req.params.id)
+
         .populate({
     path: 'child',
     select: 'firstName lastName middleName  age gender dateOfBirth Class schoolName sports educationalLevel interests'  // select only the fields you want
@@ -125,7 +130,8 @@ exports.getPaginatedGuardians = async (req, res) => {
   .populate({
     path: 'files',
     select: 'url filename'  // guardian files if you want those too
-  }).lean().select('-password');
+  }).lean() .select('-password -lastVerificationOtpSentAt -otp -lastOtpSentAt -otpExpiresAt -lastResetOtpSentAt') 
+
        if (!guardian) {
         return res.status (404).json ({ error: 'User not found'});
        }
@@ -138,7 +144,7 @@ exports.getPaginatedGuardians = async (req, res) => {
 
   exports.getGuardianByPhoneNumber = async (req, res) => {
      try {
-    const { phoneNumber } = req.body;
+    const { phoneNumber } = req.query;
 
     if (!phoneNumber) {
       return res.status(400).json({ msg: 'Phone number is required' });
@@ -152,9 +158,10 @@ exports.getPaginatedGuardians = async (req, res) => {
   .populate({
     path: 'files',
     select: 'url filename'  // guardian files if you want those too
-  }).lean().select('-password');
+  }).lean() .select('-password -lastVerificationOtpSentAt -otp -lastOtpSentAt -otpExpiresAt -lastResetOtpSentAt');
+;
        if (!guardian) {
-        return res.status (404).json ({ error: 'Use not found'});
+        return res.status (404).json ({ error: 'User not found'});
        }
        res.json ({ data: guardian});
     } catch (error)  {

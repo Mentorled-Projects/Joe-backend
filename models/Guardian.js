@@ -3,7 +3,7 @@ const bcrypt = require ('bcryptjs');
 
 const guardianSchema = new mongoose.Schema({
     phoneNumber: { type: String, required: true, unique: true},
-    otp: {type: String},
+    otp: String,
     otpExpiresAt: {
   type: Date,
 },
@@ -19,6 +19,9 @@ const guardianSchema = new mongoose.Schema({
     password: { type: String, required: false},
     createdAt: { type: Date, default: Date.now},
     email: { type: String, unique: true, sparse: true },
+    emailVerified: { type: Boolean, default: false },
+emailVerificationOtp: { type: String },
+emailVerificationExpires: { type: Date },
     firstName: { type: String},
     lastName: { type: String},
     dateOfBirth:{ type: String},

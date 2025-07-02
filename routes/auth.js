@@ -1,5 +1,5 @@
 const express = require("express");
-const { registerGuardian, registerTutor, registerAdmin, resendOTP, verifyOTP, login, forgotPassword, resendForgotPasswordOTP, resetPassword } = require("../controllers/authController");
+const { registerGuardian, registerTutor, registerAdmin, resendOTP, verifyOTP, login, forgotPassword, resendForgotPasswordOTP, resetPassword, requestEmailVerification, verifyEmailOtp } = require("../controllers/authController");
 const router = express.Router();
 const  authMiddleware  = require('../middleware/authMiddleware');
 const onlyAdmin = require ('../middleware/adminMiddleware')
@@ -103,7 +103,91 @@ router.post("/register-guardian", registerGuardian);
 
 router.post("/register-tutor", registerTutor);
 
+/**
+ * @swagger
+ * /api/v1/auth/send-email-otp:
+ *   post:
+ *     summary: Send email verification otp
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []  
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: example@email.com
+ *     responses:
+ *       200:
+ *         description: Otp sent successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Verification email sent
+ *       400:
+ *         description: Missing or invalid email
+ *       500:
+ *         description: Server error
+ */
 
+
+router.post('/send-email-otp', authMiddleware, requestEmailVerification);
+
+/**
+ * @swagger
+ * /api/v1/auth/verify-email:
+ *   post:
+ *     summary: Verify email using otp
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: [] 
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - otp
+ *             properties:
+ *               otp:
+ *                 type: string
+ *                 example: 483920
+ *     responses:
+ *       200:
+ *         description: Email verified successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Email verified successfully
+ *       400:
+ *         description: Invalid or expired otp
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
+ */
+
+router.post('/verify-email', authMiddleware, verifyEmailOtp);
 /**
  * @swagger
  * /api/v1/auth/verify-otp:

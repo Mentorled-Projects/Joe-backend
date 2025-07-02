@@ -3,13 +3,75 @@ const mongoose = require ("mongoose");
 const connectToDatabase = require ('./src/config.js');
 const cors = require ("cors");
 const dotenv = require ("dotenv");
+const http = require ('http');
+const socketIo = require ('socket.io');
+const Message = require ('./models/message.js');
+const Notification = require ('./models/Notifications.js');
 const { swaggerUi, swaggerSpec }= require ('./src/swagger.js')
 
 
 
 dotenv.config();
-
 const app = express();
+const server = http.createServer(app)
+
+const io = socketIo(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
+
+io.on("connection", (socket) => {
+    console.log("New user connected:", socket.id)
+
+
+socket.on("joinRoom", (userId) => {
+    socket.join(userId);
+    console.log(`User ${userId} joined their room`);
+  });
+
+  // Handle incoming messages
+  socket.on("sendMessage", async (data) => {
+    const message = await Message.create(data); 
+
+    // Send message to the receiver's room
+    io.to(data.receiver).emit("newMessage", message);
+
+    const notification = await Notification.create({
+  user: data.receiver,
+  userModel: data.receiverModel,
+  type: "message",
+  message: `${data.senderModel} sent you a message`,
+  data: { sender: data.sender },
+});
+
+io.to(data.receiver).emit("newNotification", notification);
+
+  });
+
+  
+  
+socket.on("markAsRead", async ({ sender, receiver }) => {
+  try {
+    const senderId = new mongoose.Types.ObjectId(sender);
+    const receiverId = new mongoose.Types.ObjectId(receiver);
+
+    await Message.updateMany(
+      { sender: senderId, receiver: receiverId, seen: false },
+      { $set: { seen: true, seenAt: new Date() } }
+    );
+
+    io.to(sender).emit("messagesRead", { by: receiver });
+  } catch (err) {
+    console.error(" Error marking messages as read:", err.message);
+  }
+});
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+  });
+});
+
 
 app.use (express.json());
 app.use(cors());
@@ -29,11 +91,9 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 const Port = 3000
 
-// app.listen (Port, () => {
-    app.listen(Port, '0.0.0.0', () => {
-
-    console.log(`Server is up and running on port ${Port}`)
-});
+server.listen (Port, '0.0.0.0', () => {
+   console.log(`Server is up and running on port ${Port}`)
+} )
 
 connectToDatabase()
 

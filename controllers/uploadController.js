@@ -37,7 +37,7 @@ exports.uploadFile = async (req, res) => {
     const filePath = req.file.path;
 
     const result = await cloudinary.uploader.upload(filePath, {
-      folder: 'uploads',
+      folder: `Peenly/${role}`,
       resource_type: 'auto',
     });
 

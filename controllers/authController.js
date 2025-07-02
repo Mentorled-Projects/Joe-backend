@@ -4,6 +4,7 @@ const Guardian = require ('../models/Guardian');
 const Tutor = require ('../models/Tutor')
 const Admin = require ('../models/Admin')
 const sendOTP = require ('../src/sendOtp')
+const sendVerificationOtp = require ('../src/sendGrid')
 const twilio = require('twilio');
 const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
@@ -447,4 +448,71 @@ exports.resetPassword = async (req, res) => {
   }
 };
 
- 
+
+exports.requestEmailVerification = async (req, res) => {
+  const { email } = req. body;
+  const Id = req.guardian?.id || req.tutor?.id;
+  const isGuardian = !!req.guardian;
+
+  try {
+    const otp = Math.floor(100000 + Math.random() * 900000); // e.g., 6-digit code
+
+
+    await sendVerificationOtp(email, otp);
+    const Model = isGuardian ? Guardian : Tutor;
+
+    await Model.findByIdAndUpdate(Id, {
+      email,
+      emailVerificationOtp: otp,
+      emailVerificationExpires: Date.now() + 10 * 60 * 1000,
+    });
+
+    console.log('Sending email to:', email);
+console.log('OTP:', otp);
+
+    res.status (200).json({ message: 'Verification otp sent to email.'});
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Failed to send otp'})
+    
+  }
+
+};
+
+
+
+exports.verifyEmailOtp = async (req, res) => {
+  const { otp } = req.body;
+
+  try {
+    // Try to find user with matching OTP in both models
+    let user = await Guardian.findOne({ emailVerificationOtp: otp });
+    let userType = 'guardian';
+
+    if (!user) {
+      user = await Tutor.findOne({ emailVerificationOtp: otp });
+      userType = 'tutor';
+    }
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired OTP.' });
+    }
+
+    if (Date.now() > user.emailVerificationExpires) {
+      return res.status(400).json({ message: 'OTP has expired.' });
+    }
+
+    user.emailVerified = true;
+    user.emailVerificationOtp = null;
+    user.emailVerificationExpires = null;
+    await user.save();
+
+    res.status(200).json({
+      message: `Email verified successfully as ${userType}.`,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Something went wrong.' });
+  }
+};

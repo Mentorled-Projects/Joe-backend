@@ -56,8 +56,15 @@ exports.registerGuardian = async (req,res) => {
         })
 
         await newGuardian.save();
-        await sendOTP(phoneNumber, otp);
+ try {
+         await sendOTP(phoneNumber, otp);
 
+          
+        } catch (OtpError) {
+          await Guardian.findByIdAndDelete(newGuardian._id);
+          return res.status (500).json ({ message: 'Failed to send OTP. Please try again'})
+          
+        }
         return res.status(201).json({
             message: 'OTP sent to phone. Please verify to complete registration.',
             guardian: {
@@ -118,13 +125,23 @@ exports.registerTutor = async (req,res) => {
         })
 
         await newTutor.save();
-        await sendOTP(phoneNumber, otp);
+
+        try {
+         await sendOTP(phoneNumber, otp);
+
+          
+        } catch (OtpError) {
+          await Tutor.findByIdAndDelete(newTutor._id);
+          return res.status (500).json ({ message: 'Failed to send OTP. Please try again'})
+          
+        }
 
         return res.status(201).json({
             message: 'OTP sent to phone. Please verify to complete registration.',
-            guardian: {
+            tutor: {
                 id: newTutor._id,
-                phoneNumber: newTutor.phoneNumber
+                phoneNumber: newTutor.phoneNumber,
+                
             }
         })
 
@@ -232,8 +249,15 @@ if (user.lastVerificationOtpSentAt && now.getTime() - lastSent.getTime() < 60 * 
     user.lastVerificationOtpSentAt = now; 
     await user.save();
 
-    await sendOTP(phoneNumber, otp);
+ try {
+         await sendOTP(phoneNumber, otp);
 
+          
+        } catch (OtpError) {
+          await user.findByIdAndDelete(user._id);
+          return res.status (500).json ({ message: 'Failed to send OTP. Please try again'})
+          
+        }
     return res.status(200).json({ message: 'OTP resent successfully' });
   } catch (err) {
     console.error('Resend OTP error:', err);
@@ -264,9 +288,7 @@ exports.verifyOTP = async (req, res) => {
     if (!user) return res.status(400).json({ message: 'User not found' });
     if (user.isVerified) return res.status(400).json({ message: 'User already verified' });
     if (user.otp !== otp) return res.status(400).json({ message: 'Invalid OTP' });
-//     if (String(user.otp) !== String(otp)) {
-//   return res.status(400).json({ message: 'Invalid OTP' });
-// }
+
     if (user.otpExpiresAt < new Date()) return res.status(400).json({ message: 'OTP expired' });
 
     user.isVerified = true;
@@ -274,7 +296,18 @@ exports.verifyOTP = async (req, res) => {
     user.otpExpiresAt = null;
     await user.save();
 
-    res.status(200).json({ message: `${role} phone number verified successfully!` });
+    const token = jwt.sign({ id: user._id, role: user.role, phoneNumber: user.phoneNumber }, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+
+ res.status(200).json({
+      message: `${role} phone number verified successfully!`,
+      token,
+      user: {
+        id: user._id,
+        phoneNumber: user.phoneNumber,
+        role,
+      }
+    });
 
   } catch (err) {
     console.error('OTP verify error:', err);
@@ -305,6 +338,10 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
+    if (!user.isVerified || !user.emailVerified) {
+       return res.status(403).json({ message: "Please verify your phoneNumber or email before logging in" });
+
+    }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" });
@@ -455,11 +492,20 @@ exports.requestEmailVerification = async (req, res) => {
   const isGuardian = !!req.guardian;
 
   try {
+    // 1. Check if email is already in use by another user
+    const emailExistsInGuardian = await Guardian.findOne({ email, _id: { $ne: Id } });
+    const emailExistsInTutor = await Tutor.findOne({ email, _id: { $ne: Id } });
+
+    if (emailExistsInGuardian || emailExistsInTutor) {
+      return res.status(400).json({ message: 'Email is already associated with another account.' });
+    }
     const otp = Math.floor(100000 + Math.random() * 900000); // e.g., 6-digit code
 
 
     await sendVerificationOtp(email, otp);
-    const Model = isGuardian ? Guardian : Tutor;
+
+        const Model = isGuardian ? Guardian : Tutor;
+
 
     await Model.findByIdAndUpdate(Id, {
       email,
@@ -498,6 +544,7 @@ exports.verifyEmailOtp = async (req, res) => {
     if (!user) {
       return res.status(400).json({ message: 'Invalid or expired OTP.' });
     }
+
 
     if (Date.now() > user.emailVerificationExpires) {
       return res.status(400).json({ message: 'OTP has expired.' });

@@ -10,7 +10,12 @@ const tutorId = req.tutor.id.toString();
             gender,
             city,
             language,
-            religion
+            religion,
+            availability,
+            teachingCategory,
+            subject,
+            experience
+
     } = req.body;
 
     // Validate basic fields 
@@ -30,7 +35,7 @@ const tutorId = req.tutor.id.toString();
         city,
         language,
         religion,
-        availablity,
+        availability,
         teachingCategory,
         subject,
         experience

@@ -32,6 +32,7 @@ emailVerificationExpires: { type: Date },
     religion: { type: String},
     role: { type: String, default: 'guardian'},
     child: [{ type: mongoose.Schema.Types.ObjectId, ref: "Child" }],
+    
     resetOtp:  {
   type: String,
 },

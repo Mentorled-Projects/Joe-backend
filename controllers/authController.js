@@ -338,7 +338,7 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    if (!user.isVerified || !user.emailVerified) {
+    if (!user.isVerified && !user.emailVerified) {
        return res.status(403).json({ message: "Please verify your phoneNumber or email before logging in" });
 
     }

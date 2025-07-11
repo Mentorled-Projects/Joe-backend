@@ -45,7 +45,7 @@ const onlyAdmin = require ('../middleware/adminMiddleware')
  *         description: Internal server error
  */
 
-router.get('/get-all-users', authMiddleware, onlyAdmin, getAllUsers);
+router.get('/get-all-users', authMiddleware, getAllUsers);
 
 /**
  * @swagger

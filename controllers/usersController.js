@@ -47,18 +47,42 @@ exports.deleteUser = async (req, res) => {
     const { reasonForDeleting, role, phoneNumber } = req.body;
 
     try {
-        const guardian = await Guardian.findOneAndDelete(phoneNumber);
-        const tutor = await Tutor.findOneAndDelete(phoneNumber);
-        const admin = await Admin.findOneAndDelete(phoneNumber);
+        // Find and delete the user
+        const guardian = await Guardian.findOneAndDelete({ phoneNumber });
+        const tutor = await Tutor.findOneAndDelete({ phoneNumber });
+        const admin = await Admin.findOneAndDelete({ phoneNumber });
 
         // Check if any user was deleted
         if (!guardian && !tutor && !admin) {
             return res.status(404).json({ msg: 'User not found' });
         }
-         await DeletionLog.create({ phoneNumber: phoneNumber, role: role, reasonForDeleting: reasonForDeleting, deletedAt: new Date() });
 
+        // Delete all children of the guardian
+        if (guardian) {
+            const children = await require('../models/Child').find({ guardian: guardian._id });
+            for (const child of children) {
+                // Delete all posts for this child
+                await require('../models/Post').deleteMany({ child: child._id });
+                // Delete all milestones for this child
+                await require('../models/Milestone').deleteMany({ child: child._id });
+            }
+            // Delete the children themselves
+            await require('../models/Child').deleteMany({ guardian: guardian._id });
+            // Delete all files uploaded by this guardian
+            await require('../models/File').deleteMany({ guardian: guardian._id });
+        }
+        // Delete all files uploaded by this tutor
+        if (tutor) {
+            await require('../models/File').deleteMany({ tutor: tutor._id });
+        }
+        // Delete all files uploaded by this admin
+        if (admin) {
+            await require('../models/File').deleteMany({ admin: admin._id });
+        }
 
-        res.json({ msg: 'User removed successfully' });
+        await DeletionLog.create({ phoneNumber: phoneNumber, role: role, reasonForDeleting: reasonForDeleting, deletedAt: new Date() });
+
+        res.json({ msg: 'User and all associated data removed successfully' });
       } catch (err) {
         console.error(err.message);
         res.status(400).json({ error: err.message });

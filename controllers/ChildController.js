@@ -1,5 +1,6 @@
 const Guardian = require("../models/Guardian");
 const Child = require("../models/Child");
+const Milestone = require("../models/Milestone");
 
 exports.addChild = async (req, res) => {
   try {
@@ -14,7 +15,8 @@ exports.addChild = async (req, res) => {
       schoolName,
       sports,
       educationalLevel,
-      interests,    } = req.body;
+      interests,  
+    favouriteSubjects  } = req.body;
 
     // Create new child
     const newChild = await Child.create({
@@ -27,7 +29,8 @@ exports.addChild = async (req, res) => {
       schoolName,
       sports,
       educationalLevel,
-      interests,  
+      interests,
+      favouriteSubjects,  
       guardian: guardianId
     });
 
@@ -53,7 +56,8 @@ exports.getAllChildren = async (req, res) => {
   .populate({
     path: 'guardian',
     select: 'firstName lastName age gender phoneNumber '  
-  });
+  })
+  .populate('milestone');
   
     res.status(200).json({ data: children });
 }catch (error) {
@@ -67,7 +71,9 @@ exports.getChildById = async (req, res) => {
         .populate({
     path: 'guardian',
     select: 'firstName lastName phoneNumber age gender'  
-  }).lean().select('-password');
+  })
+  .populate('milestone')
+  .lean().select('-password');
        if (!child) {
         return res.status (404).json ({ error: 'User not found'});
        }
@@ -77,3 +83,86 @@ exports.getChildById = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
   };
+
+  
+  // POST /milestone - Add a new milestone
+  exports.addMilestone = async (req, res) => {
+    try {
+          const guardianId = req.guardian.id.toString();
+      const { child, title, description, Date } = req.body;
+      if (!child || !title || !description || !Date) {
+        return res.status(400).json({ message: "All fields are required." });
+      }
+  
+      // Ensure the child belongs to the authenticated guardian
+    const childDoc = await Child.findOne({ _id: child, guardian: guardianId });
+    if (!childDoc) {
+      return res.status(403).json({ message: "Child not found or does not belong to this guardian." });
+    }
+
+      const milestone = new Milestone({
+        child,
+        title,
+        description,
+        Date,
+      });
+  
+      const savedMilestone = await milestone.save();
+
+      // Push the milestone ID to the child's milestone array
+    childDoc.milestone.push(savedMilestone._id);
+    await childDoc.save();
+  
+      res.status(201).json({
+          message: "Milestone created successfully",
+          savedMilestone
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create milestone.", error: error.message });
+    }
+  };
+
+  exports.getMilestonesByChildId = async (req, res) => {
+    try {
+      const { childId } = req.params;
+
+      // Find the child and populate their milestones
+      const child = await Child.findById(childId)
+        .populate({
+          path: 'milestone',
+          select: 'title description date',
+        });
+
+      if (!child) {
+        return res.status(404).json({ message: "Child not found." });
+      }
+
+      res.status(200).json({
+        message: "Milestones retrieved successfully.",
+        milestones: child.milestone,
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to retrieve milestones.", error: error.message });
+    }
+  };
+
+  exports.updateAbout = async (req, res) => {
+  const { childId } = req.params;
+  const { about } = req.body;
+
+  try {
+    const updated = await Child.findByIdAndUpdate(
+      childId,
+      { about },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ error: 'Child not found' });
+    }
+
+    res.status(200).json({ success: true, child: updated });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

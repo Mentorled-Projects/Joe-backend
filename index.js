@@ -83,6 +83,7 @@ app.use ('/api/v1/tutor', require ('./routes/tutor'))
 app.use ('/api/v1/child', require ('./routes/child'))
 app.use ('/api/v1/upload', require ('./routes/upload'))
 app.use ('/api/v1/message', require ('./routes/message'))
+app.use ('/api/v1/post', require ('./routes/post'))
 
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const { addChild, getAllChildren, getChildById } = require('../controllers/ChildController')
-const authMiddleware = require("../middleware/authMiddleware"); // you import it here
+const { addChild, getAllChildren, getChildById , addMilestone, getMilestonesByChildId, updateAbout} = require('../controllers/ChildController')
+const authMiddleware = require("../middleware/authMiddleware"); 
 const onlyAdmin = require("../middleware/adminMiddleware");
 
 
@@ -76,6 +76,137 @@ router.post("/add-child", authMiddleware, addChild);
 
 /**
  * @swagger
+ * /api/v1/child/add-milestone:
+ *   post:
+ *     summary: Add a new milestone to a child's profile
+ *     tags: [Child Management]
+ *     security:
+ *       - bearerAuth: []  
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - child
+ *               - title
+ *             properties:
+ *               child:
+ *                 type: string
+ *                 description: The ID of the child
+ *                 example: 665f81c56e9dbcb0e4c6d123
+ *               title:
+ *                 type: string
+ *                 description: Milestone title
+ *                 example: Finished phonics level 1
+ *               description:
+ *                 type: string
+ *                 description: Optional milestone description
+ *                 example: Completed all phonics exercises and can read simple books
+ *               date:
+ *                 type: string
+ *                 format: date
+ *                 description: Date the milestone was achieved
+ *                 example: 2024-06-30
+ *     responses:
+ *       201:
+ *         description: Milestone created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *       400:
+ *         description: Invalid input
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
+ */
+
+
+router.post("/add-milestone", authMiddleware, addMilestone);
+
+/**
+ * @swagger
+ * /api/v1/milestones/get-milestones/{childId}:
+ *   get:
+ *     summary: Get all milestones for a specific child
+ *     tags: [Child Management]
+ *     security:
+ *       - bearerAuth: []  # Include if using JWT or other auth
+ *     parameters:
+ *       - in: path
+ *         name: childId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the child whose milestones you want to retrieve
+ *     responses:
+ *       200:
+ *         description: List of milestones retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 milestones:
+ *                   type: array
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Child not found or no milestones available
+ *       500:
+ *         description: Server error
+ */
+
+router.get("/get-milestones/:childId", authMiddleware, getMilestonesByChildId);
+
+
+/**
+ * @swagger
+ * /api/v1/child/{childId}/about:
+ *   patch:
+ *     summary: Add or update a child's About section
+ *     tags: [Child Management]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Child's ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               about:
+ *                 type: string
+ *                 example: "I love drawing and coding with my tutor."
+ *     responses:
+ *       200:
+ *         description: About section updated
+ *       404:
+ *         description: Child not found
+ *       500:
+ *         description: Server error
+ */
+
+router.patch("/:childId/about", authMiddleware, updateAbout)
+/**
+ * @swagger
  * components:
  *   schemas:
  *     Child:
@@ -128,7 +259,7 @@ router.post("/add-child", authMiddleware, addChild);
  *         description: Internal server error
  */
 
-router.get("/get-all-children", authMiddleware, onlyAdmin, getAllChildren)
+router.get("/get-all-children", authMiddleware, getAllChildren)
 
 /**
  * @swagger
@@ -166,7 +297,7 @@ router.get("/get-all-children", authMiddleware, onlyAdmin, getAllChildren)
  *                   example: "example@gmail.com"
  */
 
-router.get("/get-by-id/:id", authMiddleware, onlyAdmin, getChildById)
+router.get("/get-by-id/:id", authMiddleware, getChildById)
 
 
 

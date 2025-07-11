@@ -142,7 +142,7 @@ router.put("/complete-profile", authMiddleware, completeProfile);
  *         description: Internal server error
  */
 
-router.get("/get-all-guardians", authMiddleware, onlyAdmin, getAllGuardians)
+router.get("/get-all-guardians", getAllGuardians)
 
 /**
  * @swagger
@@ -180,7 +180,7 @@ router.get("/get-all-guardians", authMiddleware, onlyAdmin, getAllGuardians)
  *                   example: "example@gmail.com"
  */
 
-router.get ("/get-by-id/:id", authMiddleware, onlyAdmin, getGuardianById)
+router.get ("/get-by-id/:id", authMiddleware,  getGuardianById)
 
 /**
  * @swagger
@@ -289,7 +289,7 @@ router.get ("/by-phone", getGuardianByPhoneNumber)
  *         description: Internal server error
  */
 
-router.get("/get-paginated", authMiddleware, onlyAdmin, getPaginatedGuardians)
+router.get("/get-paginated", authMiddleware,  getPaginatedGuardians)
 
 
 

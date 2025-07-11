@@ -56,12 +56,18 @@ exports.getAllGuardians = async (req, res) => {
 
   .populate({
     path: 'child',
-    select: 'firstName lastName middleName  age gender dateOfBirth Class schoolName sports educationalLevel interests'  // select only the fields you want
+    select: 'firstName lastName middleName  age gender dateOfBirth Class schoolName sports educationalLevel interests favouriteSubjects' ,
+     populate: {
+      path: 'milestone'
+    }
   })
+
   .populate({
     path: 'files',
     select: 'url filename'  // guardian files if you want those too
-  });
+  })
+  
+;
     res.status(200).json({ data: guardians });
 }catch (error) {
     res.status(500).json({ error: error.message });

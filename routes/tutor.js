@@ -108,7 +108,7 @@ router.put("/complete-profile", authMiddleware, completeProfile);
  *       500:
  *         description: Internal server error
  */
-router.get("/get-all-tutors", authMiddleware, onlyAdmin, getAllTutors)
+router.get("/get-all-tutors", authMiddleware,  getAllTutors)
 
 /**
  * @swagger
@@ -146,7 +146,7 @@ router.get("/get-all-tutors", authMiddleware, onlyAdmin, getAllTutors)
  *                   example: "example@gmail.com"
  */
 
-router.get ("/get-by-id/:id", authMiddleware, onlyAdmin, getTutorById)
+router.get ("/get-by-id/:id", authMiddleware, getTutorById)
 
 
 module.exports = router;

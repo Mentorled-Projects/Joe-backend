@@ -9,6 +9,12 @@ const Message = require ('./models/message.js');
 const Notification = require ('./models/Notifications.js');
 const { swaggerUi, swaggerSpec }= require ('./src/swagger.js')
 
+
+dotenv.config();
+const app = express();
+const server = http.createServer(app)
+
+
 app.use (express.json());
 app.use(
   cors({
@@ -17,9 +23,6 @@ app.use(
     credentials: true,
   })
 );
-dotenv.config();
-const app = express();
-const server = http.createServer(app)
 
 const io = socketIo(server, {
     cors: {

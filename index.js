@@ -3,16 +3,24 @@ const mongoose = require ("mongoose");
 const connectToDatabase = require ('./src/config.js');
 const cors = require ("cors");
 const dotenv = require ("dotenv");
-const http = require ('http');
+const https = require ('https');
 const socketIo = require ('socket.io');
 const Message = require ('./models/message.js');
 const Notification = require ('./models/Notifications.js');
 const { swaggerUi, swaggerSpec }= require ('./src/swagger.js')
+const fs = require('fs');
 
 
 dotenv.config();
+
 const app = express();
-const server = http.createServer(app)
+
+const options = {
+  key: fs.readFileSync('server.key'),
+  cert: fs.readFileSync('server.cert')
+};
+
+const server = https.createServer(options, app);
 
 
 app.use (express.json());

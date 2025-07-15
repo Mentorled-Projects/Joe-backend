@@ -9,16 +9,23 @@ const Message = require ('./models/message.js');
 const Notification = require ('./models/Notifications.js');
 const { swaggerUi, swaggerSpec }= require ('./src/swagger.js')
 
-
-
+app.use (express.json());
+app.use(
+  cors({
+    origin: ["https://joe-frontend-ten.vercel.app"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    credentials: true,
+  })
+);
 dotenv.config();
 const app = express();
 const server = http.createServer(app)
 
 const io = socketIo(server, {
     cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
+          origin: ["https://joe-frontend-ten.vercel.app"],
+          methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+
     }
 });
 
@@ -73,8 +80,7 @@ socket.on("markAsRead", async ({ sender, receiver }) => {
 });
 
 
-app.use (express.json());
-app.use(cors());
+
 
 app.use ('/api/v1/auth', require ('./routes/auth'));
 app.use ('/api/v1/users', require ('./routes/users'));

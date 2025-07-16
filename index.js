@@ -26,7 +26,7 @@ const server = https.createServer(options, app);
 app.use (express.json());
 app.use(
   cors({
-    origin: ["https://joe-frontend-ten.vercel.app"],
+    origin: ["http:localhost:3000", "https://joe-frontend-three.vercel.app"],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true,
   })

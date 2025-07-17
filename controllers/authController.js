@@ -492,7 +492,7 @@ exports.requestEmailVerification = async (req, res) => {
   const isGuardian = !!req.guardian;
 
   try {
-    // 1. Check if email is already in use by another user
+    //  Check if email is already in use by another user
     const emailExistsInGuardian = await Guardian.findOne({ email, _id: { $ne: Id } });
     const emailExistsInTutor = await Tutor.findOne({ email, _id: { $ne: Id } });
 

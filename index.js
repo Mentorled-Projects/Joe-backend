@@ -3,24 +3,24 @@ const mongoose = require ("mongoose");
 const connectToDatabase = require ('./src/config.js');
 const cors = require ("cors");
 const dotenv = require ("dotenv");
-const https = require ('https');
+const http = require ("http");
 const socketIo = require ('socket.io');
 const Message = require ('./models/message.js');
 const Notification = require ('./models/Notifications.js');
 const { swaggerUi, swaggerSpec }= require ('./src/swagger.js')
-const fs = require('fs');
+// const fs = require('fs');
 
 
 dotenv.config();
 
 const app = express();
 
-const options = {
-  key: fs.readFileSync('server.key'),
-  cert: fs.readFileSync('server.cert')
-};
+// const options = {
+//   key: fs.readFileSync('server.key'),
+//   cert: fs.readFileSync('server.cert')
+// };
 
-const server = https.createServer(options, app);
+const server = http.createServer( app);
 
 
 app.use (express.json());
@@ -34,7 +34,7 @@ app.use(
 
 const io = socketIo(server, {
     cors: {
-          origin: ["https://joe-frontend-ten.vercel.app"],
+          origin: ["https://joe-frontend-three.vercel.app"],
           methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
 
     }
@@ -109,7 +109,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 const Port = 3000
 
-server.listen (Port, '0.0.0.0', () => {
+server.listen (Port, () => {
    console.log(`Server is up and running on port ${Port}`)
 } )
 

@@ -487,25 +487,29 @@ exports.resetPassword = async (req, res) => {
 
 
 exports.requestEmailVerification = async (req, res) => {
-  const { email } = req. body;
+  const { email } = req.body;
   const Id = req.guardian?.id || req.tutor?.id;
   const isGuardian = !!req.guardian;
 
+  if (!email) {
+  return res.status(400).json({ message: "Email is required." });
+}
+
   try {
-    //  Check if email is already in use by another user
-    const emailExistsInGuardian = await Guardian.findOne({ email, _id: { $ne: Id } });
-    const emailExistsInTutor = await Tutor.findOne({ email, _id: { $ne: Id } });
+    // Case-insensitive check for email uniqueness in Guardian and Tutor models
+    const emailRegex = new RegExp(`^${email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i');
+    const emailExistsInGuardian = await Guardian.findOne({ email: emailRegex, _id: { $ne: Id } });
+    const emailExistsInTutor = await Tutor.findOne({ email: emailRegex, _id: { $ne: Id } });
 
     if (emailExistsInGuardian || emailExistsInTutor) {
       return res.status(400).json({ message: 'Email is already associated with another account.' });
     }
-    const otp = Math.floor(100000 + Math.random() * 900000); // e.g., 6-digit code
 
+    const otp = Math.floor(100000 + Math.random() * 900000); // 6-digit OTP
 
     await sendVerificationOtp(email, otp);
 
-        const Model = isGuardian ? Guardian : Tutor;
-
+    const Model = isGuardian ? Guardian : Tutor;
 
     await Model.findByIdAndUpdate(Id, {
       email,
@@ -513,15 +517,15 @@ exports.requestEmailVerification = async (req, res) => {
       emailVerificationExpires: Date.now() + 10 * 60 * 1000,
     });
 
+    console.log('User Id:', Id);
     console.log('Sending email to:', email);
-console.log('OTP:', otp);
+    console.log('OTP:', otp);
 
-    res.status (200).json({ message: 'Verification otp sent to email.'});
+    res.status(200).json({ message: 'Verification otp sent to email.' });
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Failed to send otp'})
-    
+    res.status(500).json({ message: 'Failed to send otp' });
   }
 
 };

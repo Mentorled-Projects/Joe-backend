@@ -14,8 +14,12 @@ const options = {
                 url: "http://localhost:3000/",
                 description: 'Production server',
             },
-             {
-                url: "https://167.71.131.143:3000", 
+            //  {
+            //     url: "https://167.71.131.143:3000", 
+            //     description: "Live server",
+            // },
+            {
+                url: "https://joe-backend-6682.onrender.com", 
                 description: "Live server",
             },
             // {

@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport({
 
 const mailOptions = {
   from: process.env.GMAIL_USER,
-  to: 'your@email.com', // use your real email for testing
+  to: 'samuelqueen091@email.com', // use your real email for testing
   subject: 'Production Email Test',
   text: 'This is a test email from your production server.',
 };

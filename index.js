@@ -34,7 +34,7 @@ app.use(
 
 const io = socketIo(server, {
     cors: {
-          origin: ["https://joe-frontend-new.vercel.app"],
+          origin: ["https://joe-frontend-new.vercel.app", "http://localhost:3000", "http://localhost:5173"],
           methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
 
     }

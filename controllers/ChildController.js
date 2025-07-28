@@ -89,8 +89,8 @@ exports.getChildById = async (req, res) => {
   exports.addMilestone = async (req, res) => {
     try {
           const guardianId = req.guardian.id.toString();
-      const { child, title, description, Date, images } = req.body;
-      if (!child || !title || !description || !Date) {
+      const { child, title, description, date, images } = req.body;
+      if (!child || !title || !description || !date) {
         return res.status(400).json({ message: "All fields are required." });
       }
   
@@ -104,7 +104,7 @@ exports.getChildById = async (req, res) => {
         child,
         title,
         description,
-        Date,
+        date,
         images: images || [],
 
       });

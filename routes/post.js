@@ -57,7 +57,7 @@ router.post("/add-post", authMiddleware, createPost);
 
 /**
  * @swagger
- * /api/v1/posts/get-all-post/{childId}:
+ * /api/v1/post/get-all-post/{childId}:
  *   get:
  *     summary: Get all posts created by a specific child
  *     tags: [Posts]
@@ -175,7 +175,7 @@ router.put("/update/:id", authMiddleware, updatePost);
 
 /**
  * @swagger
- * /api/v1/posts/delete/{id}:
+ * /api/v1/post/delete/{id}:
  *   delete:
  *     summary: Delete a post by its ID
  *     tags: [Posts]

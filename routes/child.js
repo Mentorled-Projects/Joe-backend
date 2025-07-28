@@ -104,11 +104,15 @@ router.post("/add-child", authMiddleware, addChild);
  *                 type: string
  *                 description: Optional milestone description
  *                 example: Completed all phonics exercises and can read simple books
- *               date:
+ *               Date:
  *                 type: string
  *                 format: date
  *                 description: Date the milestone was achieved
  *                 example: 2024-06-30
+ *               images:
+ *                 type: string
+ *                 description: Optional image URL
+ *                 example: "[(image url extracted from cloudinary)]"
  *     responses:
  *       201:
  *         description: Milestone created successfully
@@ -133,7 +137,7 @@ router.post("/add-milestone", authMiddleware, addMilestone);
 
 /**
  * @swagger
- * /api/v1/milestones/get-milestones/{childId}:
+ * /api/v1/child/get-milestones/{childId}:
  *   get:
  *     summary: Get all milestones for a specific child
  *     tags: [Child Management]

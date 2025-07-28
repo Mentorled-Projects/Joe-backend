@@ -89,7 +89,7 @@ exports.getChildById = async (req, res) => {
   exports.addMilestone = async (req, res) => {
     try {
           const guardianId = req.guardian.id.toString();
-      const { child, title, description, Date } = req.body;
+      const { child, title, description, Date, images } = req.body;
       if (!child || !title || !description || !Date) {
         return res.status(400).json({ message: "All fields are required." });
       }
@@ -105,6 +105,8 @@ exports.getChildById = async (req, res) => {
         title,
         description,
         Date,
+        images: images || [],
+
       });
   
       const savedMilestone = await milestone.save();
@@ -130,7 +132,7 @@ exports.getChildById = async (req, res) => {
       const child = await Child.findById(childId)
         .populate({
           path: 'milestone',
-          select: 'title description date',
+          select: 'title description date images',
         });
 
       if (!child) {

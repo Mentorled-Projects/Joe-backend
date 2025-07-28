@@ -30,10 +30,10 @@ const { createPost, getPostsByChildId, getPostById, updatePost, deletePost } = r
  *                 type: string
  *                 description: The post content
  *                 example: "I just finished my first science experiment!"
- *               image:
+ *               images:
  *                 type: string
  *                 description: Optional image URL
- *                 example: "https://cdn.peenlyapp.com/posts/post-image.jpg"
+ *                 example: "[(image url extracted from cloudinary)]"
  *     responses:
  *       201:
  *         description: Post created successfully

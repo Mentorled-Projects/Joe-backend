@@ -469,7 +469,7 @@ exports.resetPassword = async (req, res) => {
       role = "admin";
     }
 
-    if (!user || user.resetOtp !== otp || user.resetOtpExpires < Date.now()) {
+    if ( user.resetOtp !== otp || user.resetOtpExpires < Date.now()) {
       return res.status(400).json({ message: "Invalid or expired OTP" });
     }
 

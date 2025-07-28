@@ -14,9 +14,12 @@ const milestoneSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+   images: [ {
+      type: String, // URL or path to the image
+      required: false,
+  } ],
   Date: {
     type: Date,
-    required: true,
   },
   createdAt: {
     type: Date,
